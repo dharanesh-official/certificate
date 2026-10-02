@@ -19,6 +19,8 @@ const createEventSchema = z.object({
   status: z.enum(["DRAFT", "ACTIVE", "CLOSED", "ARCHIVED"]).default("ACTIVE"),
 });
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

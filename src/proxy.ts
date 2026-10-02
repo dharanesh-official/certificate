@@ -56,18 +56,43 @@ async function verifyJwtEdge(token: string): Promise<boolean> {
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const isPublicParam = req.nextUrl.searchParams.get("public") === "true";
 
-  // Always allow: login page and auth API
+  // 1. Always allow login page and auth API
   if (pathname === "/admin/login" || pathname.startsWith("/api/auth/")) {
     return NextResponse.next();
   }
 
+  // 2. Allow public student endpoints without admin session:
+  // - Public event list for certificate dropdown (/api/events?public=true)
+  if (pathname === "/api/events" && req.method === "GET" && isPublicParam) {
+    return NextResponse.next();
+  }
+  // - Participant lookup and suggestions
+  if (pathname === "/api/participants/lookup" || pathname === "/api/participants/suggest") {
+    return NextResponse.next();
+  }
+  // - On-demand certificate generation & download
+  if (
+    (pathname === "/api/certificates/generate" && req.method === "POST") ||
+    (pathname === "/api/certificates/download" && req.method === "GET") ||
+    (pathname.startsWith("/api/certificates/") && pathname.endsWith("/download") && req.method === "GET")
+  ) {
+    return NextResponse.next();
+  }
+  // - Certificate verification
+  if (pathname.startsWith("/api/verify")) {
+    return NextResponse.next();
+  }
+
+  // 3. Admin routes that REQUIRE active admin session:
   const isAdminPage = pathname.startsWith("/admin");
   const isAdminApi =
     pathname.startsWith("/api/admin") ||
     pathname.startsWith("/api/programs") ||
     pathname.startsWith("/api/events") ||
-    pathname.startsWith("/api/certificates");
+    pathname.startsWith("/api/certificates") ||
+    pathname.startsWith("/api/participants");
 
   if (isAdminPage || isAdminApi) {
     const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
