@@ -1,0 +1,122 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Admin {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password_hash String
+  role          String    @default("ADMIN")
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  audit_logs    AuditLog[]
+
+  @@map("admins")
+}
+
+model Program {
+  id          String    @id @default(cuid())
+  code        String    @unique // e.g. "QUANTUM-2026"
+  name        String    // e.g. "Quantum Fest 2026"
+  description String?   // e.g. "Annual National Level Technical Symposium"
+  start_date  String?   // e.g. "2026-10-02"
+  end_date    String?   // e.g. "2026-10-03"
+  venue       String?   // e.g. "Auditorium & Convention Center"
+  organizer   String    // e.g. "Kongu Engineering College"
+  department  String?   // e.g. "Computer Science & Engineering"
+  status      String    @default("ACTIVE") // ACTIVE, DRAFT, COMPLETED, ARCHIVED
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  events      Event[]
+
+  @@map("programs")
+}
+
+model Event {
+  id           String    @id @default(cuid())
+  event_code   String    @unique
+  program_id   String?
+  name         String
+  description  String?
+  event_date   String    // Stored as formatted ISO or human-readable date (e.g. 2026-10-02 or "02 October 2026")
+  start_time   String?
+  end_time     String?
+  venue        String?
+  organizer    String
+  department   String?
+  status       String    @default("ACTIVE") // DRAFT, ACTIVE, CLOSED, ARCHIVED
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  program      Program?  @relation(fields: [program_id], references: [id], onDelete: SetNull)
+  participants Participant[]
+  templates    CertificateTemplate[]
+
+  @@index([program_id])
+  @@map("events")
+}
+
+model Participant {
+  id               String       @id @default(cuid())
+  event_id         String
+  participant_code String?
+  roll_number      String
+  name             String
+  email            String?
+  department       String?
+  institution      String?
+  eligible         Boolean      @default(true)
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
+
+  event            Event        @relation(fields: [event_id], references: [id], onDelete: Cascade)
+
+  @@unique([event_id, roll_number])
+  @@index([event_id])
+  @@index([roll_number])
+  @@map("participants")
+}
+
+model CertificateTemplate {
+  id                 String   @id @default(cuid())
+  event_id           String
+  template_reference String   // Path or base64 / URL reference to background image
+  width              Int      @default(842) // A4 landscape default (842x595 pt)
+  height             Int      @default(595)
+  configuration_json String   // JSON string of positioned dynamic fields and style attributes
+  version            Int      @default(1)
+  is_active          Boolean  @default(true)
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  event              Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
+
+  @@index([event_id])
+  @@map("certificate_templates")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  admin_id    String?
+  admin_email String?
+  action      String   // LOGIN, EVENT_CREATED, PARTICIPANT_IMPORTED, TEMPLATE_SAVED, etc.
+  entity_type String   // Event, Participant, CertificateTemplate, Program, System
+  entity_id   String?
+  details     String?  // JSON string or summary
+  ip_address  String?
+  created_at  DateTime @default(now())
+
+  admin       Admin?   @relation(fields: [admin_id], references: [id], onDelete: SetNull)
+
+  @@index([action])
+  @@index([created_at])
+  @@map("audit_logs")
+}

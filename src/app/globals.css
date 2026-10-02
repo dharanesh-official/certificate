@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #F5F5DC;
+  --color-cream-50: #FCFCF7;
+  --color-cream-100: #F8F7F0;
+  --color-cream-200: #F2F1E4;
+  --color-cream-300: #EBEBD0;
+  --color-cream-400: #DFDFBF;
+  
+  --color-gold: #FBC02D;
+  --color-gold-hover: #F9A825;
+  --color-gold-light: #FFF9C4;
+  --color-gold-dark: #C49000;
+  
+  --color-brand-orange: #FF8F00;
+  --color-brand-orange-hover: #F57C00;
+  --color-brand-orange-light: #FFE0B2;
+  
+  --color-brand-red: #C62828;
+  --color-brand-red-hover: #B71C1C;
+  --color-brand-red-light: #FFCDD2;
+
+  --color-surface-panel: #FFFFFF;
+  --color-surface-border: #E5E3D8;
+  --color-surface-border-strong: #D5D2C4;
+  --color-text-primary: #1C1917;
+  --color-text-secondary: #57534E;
+  --color-text-tertiary: #8C8880;
+}
+
+:root {
+  --background: #F8F7F0;
+  --foreground: #1C1917;
+}
+
+body {
+  background-color: #F8F7F0;
+  color: #1C1917;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Institutional accents and subtle patterns */
+.bg-cream-canvas {
+  background-color: #F5F5DC;
+}
+
+.subtle-border {
+  border: 1px solid #E5E3D8;
+}
+
+.panel-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E3D8;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.gold-badge {
+  background-color: #FFF9C4;
+  color: #7F5800;
+  border: 1px solid #FBC02D;
+}
+
+.red-badge {
+  background-color: #FFEBEE;
+  color: #C62828;
+  border: 1px solid #FFCDD2;
+}
+
+.green-badge {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+  border: 1px solid #C8E6C9;
+}
+
+/* Print optimizations for certificate output */
+@media print {
+  body {
+    background: transparent !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .certificate-print-canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    page-break-after: avoid;
+  }
+}
