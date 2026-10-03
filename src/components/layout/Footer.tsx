@@ -97,35 +97,44 @@ export function Footer() {
                 href="https://www.linkedin.com/in/dharaneshk/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-bold text-[#C62828] hover:text-[#B71C1C] hover:underline inline-flex items-center gap-1 transition-colors"
+                className="group font-bold text-[#1C1917] hover:text-[#0077B5] inline-flex items-center gap-1.5 transition-colors"
                 title="Connect with Dharanesh K on LinkedIn"
               >
-                <span>Dharanesh K</span>
-                <ExternalLink className="h-3 w-3 text-[#C62828]" />
+                <span className="inline-flex h-4 w-4 items-center justify-center rounded bg-[#0077B5] text-white p-0.5 shadow-2xs group-hover:bg-[#005582] transition-colors shrink-0">
+                  <svg className="h-3 w-3 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                  </svg>
+                </span>
+                <span className="underline decoration-[#C62828] decoration-2 underline-offset-2 group-hover:decoration-[#0077B5]">
+                  Dharanesh K
+                </span>
+                <ExternalLink className="h-3 w-3 text-[#8C8880] group-hover:text-[#0077B5] transition-colors" />
               </a>
             </div>
 
-            <div className="flex items-center gap-3 text-[11px] text-[#78716C]">
+            <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 text-[11px] text-[#78716C]">
+              <span className="text-[#8C8880]">Developer Portfolio:</span>
               <a
-                href="https://www.linkedin.com/in/dharaneshk/"
+                href="https://dharaneshkumar.me/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[#0077B5] hover:text-[#005582] hover:underline transition-colors font-medium"
+                className="inline-flex items-center gap-1.5 font-semibold text-[#C62828] hover:text-[#B71C1C] hover:underline transition-colors"
+                title="Visit Dharanesh Kumar's Portfolio Website"
               >
-                <svg className="h-3 w-3 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
-                </svg>
-                <span>LinkedIn</span>
+                <Globe className="h-3 w-3 text-[#2E7D32]" />
+                <span>dharaneshkumar.me</span>
+                <span className="inline-flex items-center rounded-full bg-[#FFF9C4] px-1.5 py-0.5 text-[9px] font-bold text-[#8D6E63] border border-[#FBC02D] hover:bg-[#FEE500] transition">
+                  Visit Here ↗
+                </span>
               </a>
               <span className="text-[#D5D2C4]">•</span>
               <a
                 href="https://www.linkedin.com/in/dharaneshk/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[#57534E] hover:text-[#1C1917] hover:underline transition-colors"
+                className="inline-flex items-center gap-1 text-[#0077B5] hover:text-[#005582] hover:underline transition-colors font-medium"
               >
-                <Globe className="h-3 w-3 text-[#2E7D32]" />
-                <span>Portfolio Website</span>
+                <span>Connect on LinkedIn</span>
               </a>
             </div>
           </div>
