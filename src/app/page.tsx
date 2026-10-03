@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import {
@@ -8,6 +9,8 @@ import {
   Database,
   Lock,
   Layers,
+  CheckCircle2,
+  Search,
 } from "lucide-react";
 
 export default function HomePage() {
@@ -16,56 +19,112 @@ export default function HomePage() {
       <Navbar />
 
       <main className="flex-1">
-        {/* HERO SECTION */}
-        <section className="relative overflow-hidden border-b border-[#E5E3D8] bg-[#F5F5DC]/60 py-20 sm:py-28">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center space-y-7">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#D5D2C4] bg-white px-4 py-1.5 text-xs font-semibold text-[#8D6E63] shadow-xs">
-              <span className="h-2 w-2 rounded-full bg-[#C62828]"></span>
-              Official Institutional Certification Authority
-            </div>
+        {/* HERO SECTION WITH AVATAR */}
+        <section className="relative overflow-hidden border-b border-[#E5E3D8] bg-gradient-to-b from-[#F5F5DC]/80 via-[#F8F7F0] to-[#F8F7F0] py-12 sm:py-16 lg:py-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+              
+              {/* Left Column: Headline, Description & CTAs */}
+              <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#D5D2C4] bg-white px-4 py-1.5 text-xs font-semibold text-[#8D6E63] shadow-xs">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C62828] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C62828]"></span>
+                  </span>
+                  Official Institutional Certification Authority
+                </div>
 
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-[#1C1917] leading-[1.1]">
-              Generate. Verify. <span className="text-[#C62828]">Trust.</span>
-            </h1>
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#1C1917] leading-[1.15]">
+                  Generate. Verify. <span className="text-[#C62828] underline decoration-[#FBC02D] decoration-wavy decoration-from-font">Trust.</span>
+                </h1>
 
-            <p className="text-base sm:text-lg text-[#57534E] leading-relaxed max-w-2xl mx-auto">
-              A secure platform for generating and verifying official event certificates.
-              Engineered with cryptographic authenticity, on-demand memory rendering, and permanent QR-linked verification.
-            </p>
+                <p className="text-base sm:text-lg text-[#57534E] leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                  Search across all institutional events by entering your <strong>Name</strong> or <strong>Roll Number</strong>. 
+                  View your available certificates, preview verified records, and download print-ready tamper-proof credentials instantly with <strong>CertifyMe</strong>.
+                </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-              <Link
-                href="/generate"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#C62828] px-8 py-4 text-sm font-semibold text-white shadow-md hover:bg-[#B71C1C] transition-all"
-              >
-                <FileCheck className="h-4 w-4 text-[#FBC02D]" />
-                Generate Certificate
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+                {/* CTA Buttons */}
+                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-1">
+                  <Link
+                    href="/generate"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#C62828] px-7 py-3.5 text-sm font-bold text-white shadow-md hover:bg-[#B71C1C] hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    <FileCheck className="h-4 w-4 text-[#FBC02D]" />
+                    Generate Certificate
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
 
-              <Link
-                href="/verify"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#D5D2C4] bg-white px-8 py-4 text-sm font-semibold text-[#1C1917] shadow-xs hover:bg-[#F2F1E4] transition-all"
-              >
-                <ShieldCheck className="h-4 w-4 text-[#2E7D32]" />
-                Verify Certificate
-              </Link>
-            </div>
+                  <Link
+                    href="/verify"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl border border-[#D5D2C4] bg-white px-7 py-3.5 text-sm font-semibold text-[#1C1917] shadow-xs hover:bg-[#F2F1E4] hover:border-[#8D6E63] transition-all"
+                  >
+                    <ShieldCheck className="h-4 w-4 text-[#2E7D32]" />
+                    Verify Authenticity
+                  </Link>
+                </div>
 
-            {/* Quick Trust Highlights */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-10 border-t border-[#E5E3D8]/80 text-xs text-[#57534E] max-w-3xl mx-auto">
-              <div className="p-4 rounded-xl bg-white/70 border border-[#E5E3D8] shadow-2xs">
-                <span className="font-bold text-[#1C1917] block text-sm">On-Demand Stream</span>
-                Zero permanent disk storage
+                {/* Quick Trust Highlights */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-[#E5E3D8]/80 text-xs text-[#57534E]">
+                  <div className="p-3.5 rounded-xl bg-white/80 border border-[#E5E3D8] shadow-2xs">
+                    <span className="font-bold text-[#1C1917] block text-sm mb-0.5">On-Demand Stream</span>
+                    Zero static file storage on server
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-white/80 border border-[#E5E3D8] shadow-2xs">
+                    <span className="font-bold text-[#1C1917] block text-sm mb-0.5">Cryptographic Keys</span>
+                    Unique IDs &amp; SHA-256 HMAC
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-white/80 border border-[#E5E3D8] shadow-2xs">
+                    <span className="font-bold text-[#1C1917] block text-sm mb-0.5">Permanent QR Record</span>
+                    Instant scanner validation
+                  </div>
+                </div>
               </div>
-              <div className="p-4 rounded-xl bg-white/70 border border-[#E5E3D8] shadow-2xs">
-                <span className="font-bold text-[#1C1917] block text-sm">Cryptographic Keys</span>
-                Unique IDs & SHA-256 HMAC
+
+              {/* Right Column: Avatar Showcase */}
+              <div className="lg:col-span-5 flex justify-center items-center relative">
+                {/* Ambient Soft Glow Behind Avatar */}
+                <div className="absolute -inset-4 sm:-inset-8 rounded-full bg-gradient-to-tr from-[#FBC02D]/25 via-[#C62828]/15 to-[#2E7D32]/15 blur-3xl opacity-80 pointer-events-none" />
+
+                {/* Main Avatar Card Frame */}
+                <div className="relative group w-full max-w-[340px] sm:max-w-[400px] flex justify-center">
+                  
+                  {/* Floating Shield Badge (Top-Right) */}
+                  <div className="absolute top-8 -right-2 sm:-right-4 z-20 flex items-center gap-2 rounded-2xl bg-white/95 backdrop-blur-md px-3.5 py-2 border border-[#E5E3D8] shadow-lg text-left animate-bounce [animation-duration:4s]">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#E8F5E9] text-[#2E7D32] border border-[#A5D6A7]">
+                      <CheckCircle2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-bold text-[#1C1917] leading-tight">100% Verified</div>
+                      <div className="text-[10px] text-[#57534E]">Cryptographic Seal</div>
+                    </div>
+                  </div>
+
+                  {/* Floating Multi-Event Badge (Bottom-Left) */}
+                  <div className="absolute bottom-12 -left-2 sm:-left-6 z-20 flex items-center gap-2 rounded-2xl bg-white/95 backdrop-blur-md px-3.5 py-2 border border-[#E5E3D8] shadow-lg text-left">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#FFF9C4] text-[#C62828] border border-[#FBC02D]">
+                      <Search className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-bold text-[#1C1917] leading-tight">Multi-Event Search</div>
+                      <div className="text-[10px] text-[#57534E]">Name &amp; Roll Number</div>
+                    </div>
+                  </div>
+
+                  {/* High Resolution Avatar Image */}
+                  <div className="relative z-10 transition-transform duration-500 group-hover:scale-[1.03]">
+                    <Image
+                      src="/avatar.png"
+                      alt="CertifyMe Assistant Avatar"
+                      width={440}
+                      height={660}
+                      priority
+                      className="w-full h-auto max-h-[500px] sm:max-h-[560px] object-contain drop-shadow-2xl"
+                    />
+                  </div>
+                </div>
+
               </div>
-              <div className="p-4 rounded-xl bg-white/70 border border-[#E5E3D8] shadow-2xs">
-                <span className="font-bold text-[#1C1917] block text-sm">Permanent QR Record</span>
-                Instant scanner validation
-              </div>
+
             </div>
           </div>
         </section>
@@ -89,18 +148,18 @@ export default function HomePage() {
               {/* Step 1 */}
               <div className="rounded-xl border border-[#E5E3D8] bg-[#F8F7F0] p-6 relative">
                 <div className="text-xs font-extrabold text-[#C62828] mb-2">STEP 01</div>
-                <h3 className="text-base font-bold text-[#1C1917] mb-1">Select Event</h3>
+                <h3 className="text-base font-bold text-[#1C1917] mb-1">Enter Name or Roll No</h3>
                 <p className="text-xs text-[#57534E] leading-relaxed">
-                  Choose from currently active authorized symposiums, conferences, or workshops.
+                  Search across all events and programs instantly without needing to pick an event first.
                 </p>
               </div>
 
               {/* Step 2 */}
               <div className="rounded-xl border border-[#E5E3D8] bg-[#F8F7F0] p-6 relative">
                 <div className="text-xs font-extrabold text-[#FF8F00] mb-2">STEP 02</div>
-                <h3 className="text-base font-bold text-[#1C1917] mb-1">Enter Roll Number</h3>
+                <h3 className="text-base font-bold text-[#1C1917] mb-1">Select Available Event</h3>
                 <p className="text-xs text-[#57534E] leading-relaxed">
-                  Provide your official institutional Roll Number or Participant Identifier.
+                  View all events where your certificate is available and select the desired one.
                 </p>
               </div>
 

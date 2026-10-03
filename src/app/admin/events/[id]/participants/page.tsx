@@ -15,6 +15,7 @@ import {
   X,
   FileSpreadsheet,
   Award,
+  Trash2,
 } from "lucide-react";
 
 interface ParticipantItem {
@@ -66,6 +67,15 @@ export default function EventParticipantsPage({
   const [addDept, setAddDept] = useState("M.Sc Software Systems");
   const [addSubmitting, setAddSubmitting] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+
+  // Delete Participant state
+  const [participantToDelete, setParticipantToDelete] = useState<ParticipantItem | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Multiple Delete state
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   // CSV Import Modal
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
@@ -152,13 +162,22 @@ export default function EventParticipantsPage({
     setAddSubmitting(true);
     setAddError(null);
 
+    // Validate that name only contains alphabetic characters (A-Z) and spaces
+    if (!/^[A-Za-z\s]+$/.test(addName.trim())) {
+      setAddError(
+        "The Name field should accept only alphabetic characters (A–Z). Numbers, special characters, and other non-alphabetic characters are not allowed."
+      );
+      setAddSubmitting(false);
+      return;
+    }
+
     try {
       const res = await fetch(`/api/events/${eventId}/participants`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           roll_number: addRoll,
-          name: addName,
+          name: addName.trim(),
           email: addEmail,
           department: addDept,
           eligible: true,
@@ -179,6 +198,68 @@ export default function EventParticipantsPage({
       setAddError("A network error occurred.");
     } finally {
       setAddSubmitting(false);
+    }
+  };
+
+  const handleDeleteParticipant = async (participantId: string) => {
+    try {
+      setDeletingId(participantId);
+      const res = await fetch(`/api/participants/${participantId}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to delete participant");
+      } else {
+        setParticipantToDelete(null);
+        await loadData();
+      }
+    } catch (e) {
+      console.error("Delete participant error:", e);
+      alert("A network error occurred while deleting participant.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === participants.length && participants.length > 0) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(participants.map((p) => p.id));
+    }
+  };
+
+  const toggleSelectParticipant = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    setIsBulkDeleting(true);
+    try {
+      const res = await fetch(`/api/events/${eventId}/participants`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ participantIds: selectedIds }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to delete participants");
+      } else {
+        setSelectedIds([]);
+        setIsBulkDeleteModalOpen(false);
+        await loadData();
+      }
+    } catch (e) {
+      console.error("Bulk delete error:", e);
+      alert("A network error occurred while deleting participants.");
+    } finally {
+      setIsBulkDeleting(false);
     }
   };
 
@@ -364,6 +445,37 @@ export default function EventParticipantsPage({
         </form>
       </div>
 
+      {/* Bulk Action Bar when items selected */}
+      {selectedIds.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#FFEBEE] border border-[#FFCDD2] p-3.5 rounded-xl shadow-xs animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#C62828] text-white text-xs font-bold">
+              {selectedIds.length}
+            </span>
+            <span className="text-xs font-bold text-[#C62828]">
+              {selectedIds.length === 1 ? "1 participant selected" : `${selectedIds.length} participants selected`}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectedIds([])}
+              className="rounded-lg border border-[#D5D2C4] bg-white px-3 py-1.5 text-xs font-semibold text-[#57534E] hover:bg-[#F2F1E4] transition cursor-pointer"
+            >
+              Clear Selection
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsBulkDeleteModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#C62828] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[#B71C1C] transition shadow-xs cursor-pointer"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete Selected ({selectedIds.length})
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Participants Table */}
       <div className="rounded-xl border border-[#E5E3D8] bg-white shadow-2xs overflow-hidden">
         {loading ? (
@@ -382,17 +494,40 @@ export default function EventParticipantsPage({
             <table className="w-full text-left text-xs">
               <thead className="bg-[#FAF9F5] border-b border-[#E5E3D8] text-[#8C8880] uppercase tracking-wider font-semibold">
                 <tr>
+                  <th className="px-4 py-3.5 w-10 text-center">
+                    <input
+                      type="checkbox"
+                      checked={participants.length > 0 && selectedIds.length === participants.length}
+                      onChange={toggleSelectAll}
+                      className="rounded border-[#D5D2C4] text-[#C62828] focus:ring-[#C62828] cursor-pointer h-4 w-4"
+                      title={selectedIds.length === participants.length ? "Deselect all" : "Select all"}
+                    />
+                  </th>
                   <th className="px-5 py-3.5">Roll Number</th>
                   <th className="px-5 py-3.5">Participant Name</th>
                   <th className="px-5 py-3.5">Department / Institution</th>
                   <th className="px-5 py-3.5">Eligibility</th>
-                  <th className="px-5 py-3.5">Status</th>
-                  <th className="px-5 py-3.5 text-right">Certificate Action</th>
+                  <th className="px-5 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E3D8]">
-                {participants.map((p) => (
-                  <tr key={p.id} className="hover:bg-[#FBFBF9] transition">
+                {participants.map((p) => {
+                  const isSelected = selectedIds.includes(p.id);
+                  return (
+                  <tr
+                    key={p.id}
+                    className={`hover:bg-[#FBFBF9] transition ${
+                      isSelected ? "bg-[#FFEBEE]/40" : ""
+                    }`}
+                  >
+                    <td className="px-4 py-3.5 text-center">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelectParticipant(p.id)}
+                        className="rounded border-[#D5D2C4] text-[#C62828] focus:ring-[#C62828] cursor-pointer h-4 w-4"
+                      />
+                    </td>
                     <td className="px-5 py-3.5 font-mono font-bold text-[#1C1917]">
                       {p.roll_number}
                     </td>
@@ -418,25 +553,37 @@ export default function EventParticipantsPage({
                         {p.eligible ? "Eligible" : "Ineligible"}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-right space-x-2">
-                      {p.eligible ? (
-                        <a
-                          href={`/api/certificates/download?eventId=${eventId}&participantId=${p.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded bg-[#C62828] px-2.5 py-1 text-[11px] font-bold text-white hover:bg-[#B71C1C] transition shadow-2xs"
-                          title="Generate & Download Certificate"
+                    <td className="px-5 py-3.5 text-right">
+                      <div className="inline-flex items-center justify-end gap-2">
+                        {p.eligible ? (
+                          <a
+                            href={`/api/certificates/download?eventId=${eventId}&participantId=${p.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 rounded bg-[#C62828] px-2.5 py-1 text-[11px] font-bold text-white hover:bg-[#B71C1C] transition shadow-2xs"
+                            title="Generate & Download Certificate"
+                          >
+                            <Download className="h-3 w-3" /> Download PDF
+                          </a>
+                        ) : (
+                          <span className="text-[11px] text-[#8C8880] italic">
+                            Ineligible
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setParticipantToDelete(p)}
+                          className="inline-flex items-center gap-1 rounded-lg border border-[#FFCDD2] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#C62828] hover:bg-[#FFEBEE] transition shadow-2xs cursor-pointer"
+                          title="Delete Participant"
                         >
-                          <Download className="h-3 w-3" /> Download PDF
-                        </a>
-                      ) : (
-                        <span className="text-[11px] text-[#8C8880] italic">
-                          Ineligible
-                        </span>
-                      )}
+                          <Trash2 className="h-3 w-3 text-[#C62828]" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                );
+              })}
               </tbody>
             </table>
           </div>
@@ -488,10 +635,35 @@ export default function EventParticipantsPage({
                   type="text"
                   placeholder="e.g. Dharanesh Kumar"
                   value={addName}
-                  onChange={(e) => setAddName(e.target.value)}
+                  onChange={(e) => {
+                    const filtered = e.target.value.replace(/[^A-Za-z\s]/g, "");
+                    setAddName(filtered);
+                  }}
+                  onKeyDown={(e) => {
+                    if (
+                      e.key === "Backspace" ||
+                      e.key === "Delete" ||
+                      e.key === "Tab" ||
+                      e.key === "ArrowLeft" ||
+                      e.key === "ArrowRight" ||
+                      e.key === "Home" ||
+                      e.key === "End" ||
+                      e.key === " "
+                    ) {
+                      return;
+                    }
+                    if (!/^[A-Za-z]$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
+                      e.preventDefault();
+                    }
+                  }}
+                  pattern="^[A-Za-z\s]+$"
+                  title="Only alphabetic characters (A–Z) and spaces are allowed"
                   required
                   className="w-full rounded-lg border border-[#D5D2C4] p-2.5 text-[#1C1917] focus:outline-none focus:border-[#C62828]"
                 />
+                <p className="text-[10px] text-[#8C8880] mt-1">
+                  Accepts only alphabetic characters (A–Z) and spaces.
+                </p>
               </div>
 
               <div>
@@ -745,6 +917,153 @@ export default function EventParticipantsPage({
                   Confirm & Import Valid Records
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE PARTICIPANT CONFIRMATION MODAL */}
+      {participantToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-xl border border-[#D5D2C4] bg-white p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E3D8] pb-3">
+              <div className="flex items-center gap-2 text-[#C62828]">
+                <Trash2 className="h-5 w-5" />
+                <h2 className="text-base font-bold text-[#1C1917]">
+                  Delete Participant
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setParticipantToDelete(null)}
+                className="text-[#8C8880] hover:text-[#1C1917]"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-2 text-xs text-[#57534E]">
+              <p>
+                Are you sure you want to remove{" "}
+                <strong className="text-[#1C1917]">{participantToDelete.name}</strong> (Roll No:{" "}
+                <span className="font-mono font-bold text-[#1C1917]">{participantToDelete.roll_number}</span>) from the participant roster?
+              </p>
+              <p className="text-[11px] text-[#C62828] bg-[#FFEBEE] p-2 rounded border border-[#FFCDD2]">
+                This will permanently delete the participant record from this event roster.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E5E3D8]">
+              <button
+                type="button"
+                onClick={() => setParticipantToDelete(null)}
+                disabled={deletingId !== null}
+                className="rounded-lg border border-[#D5D2C4] bg-white px-4 py-2 text-xs font-semibold text-[#57534E] hover:bg-[#F2F1E4] disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeleteParticipant(participantToDelete.id)}
+                disabled={deletingId !== null}
+                className="rounded-lg bg-[#C62828] px-4 py-2 text-xs font-semibold text-white hover:bg-[#B71C1C] disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {deletingId ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Delete Participant
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BULK DELETE PARTICIPANTS CONFIRMATION MODAL */}
+      {isBulkDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-xl border border-[#D5D2C4] bg-white p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E3D8] pb-3">
+              <div className="flex items-center gap-2 text-[#C62828]">
+                <Trash2 className="h-5 w-5" />
+                <h2 className="text-base font-bold text-[#1C1917]">
+                  Delete Multiple Participants
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsBulkDeleteModalOpen(false)}
+                className="text-[#8C8880] hover:text-[#1C1917]"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-[#57534E]">
+              <p>
+                Are you sure you want to delete{" "}
+                <strong className="text-[#C62828] font-bold text-sm">
+                  {selectedIds.length}
+                </strong>{" "}
+                selected participant(s) from this event roster?
+              </p>
+
+              <div className="max-h-48 overflow-y-auto rounded-lg border border-[#E5E3D8] bg-[#FBFBF9] p-3 space-y-1.5 divide-y divide-[#E5E3D8]">
+                {participants
+                  .filter((p) => selectedIds.includes(p.id))
+                  .map((p) => (
+                    <div
+                      key={p.id}
+                      className="pt-1.5 first:pt-0 flex items-center justify-between gap-2"
+                    >
+                      <span className="font-semibold text-[#1C1917] truncate">
+                        {p.name}
+                      </span>
+                      <span className="font-mono text-[#7F5800] bg-[#FFF9C4] px-1.5 py-0.5 rounded text-[11px] border border-[#FBC02D] shrink-0">
+                        {p.roll_number}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+
+              <p className="text-[11px] text-[#C62828] bg-[#FFEBEE] p-2.5 rounded-lg border border-[#FFCDD2]">
+                <strong>Warning:</strong> This action cannot be undone. All selected participant records will be permanently removed from this event.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E5E3D8]">
+              <button
+                type="button"
+                onClick={() => setIsBulkDeleteModalOpen(false)}
+                disabled={isBulkDeleting}
+                className="rounded-lg border border-[#D5D2C4] bg-white px-4 py-2 text-xs font-semibold text-[#57534E] hover:bg-[#F2F1E4] disabled:opacity-50 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleBulkDelete}
+                disabled={isBulkDeleting}
+                className="rounded-lg bg-[#C62828] px-4 py-2 text-xs font-semibold text-white hover:bg-[#B71C1C] disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+              >
+                {isBulkDeleting ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Deleting {selectedIds.length} Participants...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Confirm & Delete ({selectedIds.length})
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

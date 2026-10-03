@@ -9,17 +9,33 @@ export async function GET(req: NextRequest) {
     const eventId = url.searchParams.get("eventId");
     const q = url.searchParams.get("q")?.trim() || "";
 
-    if (!eventId) {
-      return NextResponse.json(
-        { error: "Event ID is required to fetch participant suggestions.", participants: [] },
-        { status: 400 }
-      );
-    }
+    // If eventId is provided, scope to that event
+    if (eventId) {
+      if (!q) {
+        const participants = await prisma.participant.findMany({
+          where: { event_id: eventId, eligible: true },
+          select: {
+            id: true,
+            name: true,
+            roll_number: true,
+            department: true,
+            institution: true,
+          },
+          take: 5,
+          orderBy: { name: "asc" },
+        });
+        return NextResponse.json({ participants });
+      }
 
-    if (!q) {
-      // Return first 5 participants as quick suggestions when focused
       const participants = await prisma.participant.findMany({
-        where: { event_id: eventId, eligible: true },
+        where: {
+          event_id: eventId,
+          eligible: true,
+          OR: [
+            { name: { contains: q, mode: "insensitive" } },
+            { roll_number: { contains: q, mode: "insensitive" } },
+          ],
+        },
         select: {
           id: true,
           name: true,
@@ -27,17 +43,22 @@ export async function GET(req: NextRequest) {
           department: true,
           institution: true,
         },
-        take: 5,
+        take: 10,
         orderBy: { name: "asc" },
       });
+
       return NextResponse.json({ participants });
     }
 
-    // STRICTLY SCOPED to the selected event: never touches other events!
+    // Global suggest across all active events
+    if (!q) {
+      return NextResponse.json({ participants: [] });
+    }
+
     const participants = await prisma.participant.findMany({
       where: {
-        event_id: eventId,
         eligible: true,
+        event: { status: "ACTIVE" },
         OR: [
           { name: { contains: q, mode: "insensitive" } },
           { roll_number: { contains: q, mode: "insensitive" } },
@@ -49,8 +70,18 @@ export async function GET(req: NextRequest) {
         roll_number: true,
         department: true,
         institution: true,
+        event: {
+          select: {
+            id: true,
+            name: true,
+            event_code: true,
+            program: {
+              select: { name: true },
+            },
+          },
+        },
       },
-      take: 10,
+      take: 8,
       orderBy: { name: "asc" },
     });
 

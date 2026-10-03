@@ -8,7 +8,14 @@ import { cleanParticipantName, cleanRollNumber, cleanGenericText } from "@/lib/u
 
 const createParticipantSchema = z.object({
   roll_number: z.string().min(1, "Roll number is required").transform(v => cleanRollNumber(v)),
-  name: z.string().min(2, "Full name is required").transform(v => cleanParticipantName(v)),
+  name: z
+    .string()
+    .min(1, "Full name is required")
+    .regex(
+      /^[A-Za-z\s]+$/,
+      "The Name field should accept only alphabetic characters (A–Z). Numbers, special characters, and other non-alphabetic characters are not allowed."
+    )
+    .transform(v => cleanParticipantName(v)),
   email: z.string().email("Invalid email format").optional().or(z.literal("")),
   department: z.string().optional().transform(v => v ? cleanGenericText(v) : undefined),
   institution: z.string().optional().transform(v => v ? cleanGenericText(v) : undefined),
@@ -132,5 +139,53 @@ export async function POST(
   } catch (error) {
     console.error("POST participant error:", error);
     return NextResponse.json({ error: "Failed to add participant" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getAdminSession();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id: eventId } = await context.params;
+    const body = await req.json();
+    const { participantIds } = body;
+
+    if (!participantIds || !Array.isArray(participantIds) || participantIds.length === 0) {
+      return NextResponse.json(
+        { error: "Please provide an array of participant IDs to delete." },
+        { status: 400 }
+      );
+    }
+
+    const result = await prisma.participant.deleteMany({
+      where: {
+        id: { in: participantIds },
+        event_id: eventId,
+      },
+    });
+
+    await logAuditAction({
+      adminId: session.id,
+      adminEmail: session.email,
+      action: "PARTICIPANTS_BATCH_DELETED",
+      entityType: "Participant",
+      entityId: eventId,
+      details: { count: result.count, participantIds },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: `Successfully deleted ${result.count} participant(s).`,
+      count: result.count,
+    });
+  } catch (error) {
+    console.error("DELETE participants error:", error);
+    return NextResponse.json({ error: "Failed to delete participants" }, { status: 500 });
   }
 }

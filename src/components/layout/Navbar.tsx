@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Award, ShieldCheck, FileCheck, Menu, X } from "lucide-react";
+import { ShieldCheck, FileCheck, Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
   { href: "/", label: "Home", exact: true, icon: null },
@@ -23,12 +24,18 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-3 group shrink-0">
-          <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-[#C62828] text-white shadow-sm border border-[#FF8F00] transition-transform group-hover:scale-105">
-            <Award className="h-5 w-5 sm:h-6 sm:w-6 text-[#FBC02D]" />
+          <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-xs border border-[#D5D2C4] overflow-hidden transition-transform group-hover:scale-105">
+            <Image
+              src="/icon.png"
+              alt="CertifyMe Logo"
+              width={40}
+              height={40}
+              className="h-full w-full object-cover"
+            />
           </div>
           <div>
-            <span className="text-sm sm:text-base font-bold tracking-tight text-[#1C1917] block leading-tight">
-              CERT<span className="text-[#C62828]">PORTAL</span>
+            <span className="text-base sm:text-lg font-extrabold tracking-tight text-[#1C1917] block leading-tight">
+              Certify<span className="text-[#C62828]">Me</span>
             </span>
             <span className="hidden sm:block text-[11px] font-medium tracking-wider text-[#57534E] uppercase">
               Event Certification &amp; Registry

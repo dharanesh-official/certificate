@@ -6,7 +6,15 @@ import { z } from "zod";
 
 const updateParticipantSchema = z.object({
   roll_number: z.string().min(1).transform(v => v.trim().toUpperCase()).optional(),
-  name: z.string().min(2).transform(v => v.trim()).optional(),
+  name: z
+    .string()
+    .min(1)
+    .regex(
+      /^[A-Za-z\s]+$/,
+      "The Name field should accept only alphabetic characters (A–Z). Numbers, special characters, and other non-alphabetic characters are not allowed."
+    )
+    .transform(v => v.trim())
+    .optional(),
   email: z.string().email().optional().or(z.literal("")),
   department: z.string().optional(),
   institution: z.string().optional(),

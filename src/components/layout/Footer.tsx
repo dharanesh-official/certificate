@@ -1,5 +1,6 @@
-import { Shield, Award, CheckCircle2 } from "lucide-react";
+import { Shield, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export function Footer() {
   return (
@@ -9,11 +10,17 @@ export function Footer() {
           {/* Brand — full width on mobile */}
           <div className="col-span-2 space-y-3">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded bg-[#C62828] text-white">
-                <Award className="h-5 w-5 text-[#FBC02D]" />
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-xs border border-[#D5D2C4] overflow-hidden">
+                <Image
+                  src="/icon.png"
+                  alt="CertifyMe Logo"
+                  width={32}
+                  height={32}
+                  className="h-full w-full object-cover"
+                />
               </div>
-              <span className="font-bold tracking-tight text-[#1C1917] text-base">
-                CERT<span className="text-[#C62828]">PORTAL</span>
+              <span className="font-extrabold tracking-tight text-[#1C1917] text-lg">
+                Certify<span className="text-[#C62828]">Me</span>
               </span>
             </div>
             <p className="text-xs text-[#57534E] max-w-md leading-relaxed">

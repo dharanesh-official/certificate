@@ -2,8 +2,16 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Event Certificate Portal | Generation & Verification",
+  title: "CertifyMe | Event Certificate Portal & Verification",
   description: "Official institutional portal for dynamic event certificate issuance, on-demand generation, and cryptographic verification.",
+  icons: {
+    icon: [
+      { url: "/icon.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({

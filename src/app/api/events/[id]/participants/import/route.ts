@@ -88,6 +88,16 @@ export async function POST(
         return;
       }
 
+      if (!/^[A-Za-z\s]+$/.test(name)) {
+        invalidRows.push({
+          row: rowNum,
+          roll_number: rollNumber,
+          name,
+          reason: "The Name field should accept only alphabetic characters (A–Z). Numbers, special characters, and other non-alphabetic characters are not allowed.",
+        });
+        return;
+      }
+
       if (seenInCsv.has(rollNumber)) {
         duplicateRows.push({
           row: rowNum,
